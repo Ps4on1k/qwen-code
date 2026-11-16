@@ -1,0 +1,227 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://example.org/sudrf-case.schema.json",
+  "title": "Судебное дело (sudrf.ru, ГС «Правосудие»)",
+  "description": "Структура результата парсинга страницы судебного делопроизводства вида https://<суд>.sudrf.ru/modules.php?name=sud_delo&name_op=case&...",
+  "type": "object",
+  "required": ["source", "court", "case", "case_movement", "parties"],
+  "additionalProperties": false,
+  "properties": {
+    "source": {
+      "type": "object",
+      "description": "Откуда получены данные",
+      "required": ["url"],
+      "additionalProperties": true,
+      "properties": {
+        "url": {
+          "type": ["string", "null"],
+          "description": "Полный URL страницы дела"
+        },
+        "court_host": {
+          "type": ["string", "null"],
+          "description": "Хост сайта суда, например moskovsky.twr.sudrf.ru"
+        },
+        "_uid": {
+          "type": "string",
+          "description": "Параметр _uid из URL (уникальный идентификатор записи в модуле)"
+        },
+        "_deloId": {
+          "type": "string",
+          "pattern": "^\\d+$",
+          "description": "Идентификатор дела в учётной системе (_deloId из URL)"
+        },
+        "_caseType": {
+          "type": "string",
+          "description": "Тип дела (_caseType из URL)"
+        },
+        "srv_num": {
+          "type": "string",
+          "description": "Номер сервера (srv_num из URL)"
+        }
+      }
+    },
+    "fetched_at": {
+      "type": ["string", "null"],
+      "format": "date-time",
+      "description": "Момент загрузки/разбора страницы (UTC, ISO 8601)"
+    },
+    "court": {
+      "type": "object",
+      "description": "Сведения о суде (из шапки сайта)",
+      "additionalProperties": false,
+      "properties": {
+        "name": {
+          "type": ["string", "null"],
+          "description": "Наименование суда"
+        },
+        "address": {
+          "type": ["string", "null"],
+          "description": "Почтовый адрес суда"
+        },
+        "phone": {
+          "type": ["string", "null"],
+          "description": "Контактные телефоны"
+        },
+        "email": {
+          "type": ["string", "null"],
+          "format": "email",
+          "description": "Электронная почта суда"
+        },
+        "website": {
+          "type": ["string", "null"],
+          "description": "Базовый URL сайта суда"
+        }
+      }
+    },
+    "case": {
+      "type": "object",
+      "description": "Основная информация о деле (вкладка «Дело»)",
+      "additionalProperties": false,
+      "properties": {
+        "case_number": {
+          "type": ["string", "null"],
+          "description": "Номер дела, например 2-2627/2026"
+        },
+        "registration_number": {
+          "type": ["string", "null"],
+          "description": "Регистрационный номер материала, например М-2120/2026"
+        },
+        "instance": {
+          "type": ["string", "null"],
+          "description": "Категория производства, например «Гражданские дела - первая инстанция»"
+        },
+        "uid": {
+          "type": ["string", "null"],
+          "description": "Уникальный идентификатор дела (69RS0038-03-2026-006998-64)"
+        },
+        "date_received": {
+          "type": ["string", "null"],
+          "format": "date",
+          "description": "Дата поступления материалов в суд (ISO 8601)"
+        },
+        "case_category": {
+          "type": ["string", "null"],
+          "description": "Категория дела одной строкой"
+        },
+        "case_category_parts": {
+          "type": "array",
+          "description": "Категория дела, разбитая по уровням (разделитель «→»)",
+          "items": { "type": "string" }
+        },
+        "claim_summary": {
+          "type": ["string", "null"],
+          "description": "Сущность заявленного требования"
+        },
+        "judge": {
+          "type": ["string", "null"],
+          "description": "Судья (ФИО)"
+        },
+        "review_type": {
+          "type": ["string", "null"],
+          "description": "Признак рассмотрения дела"
+        },
+        "published_at": {
+          "type": ["object", "null"],
+          "description": "Дата и время публикации карточки дела",
+          "additionalProperties": false,
+          "required": ["date", "time"],
+          "properties": {
+            "date": { "type": ["string", "null"], "format": "date" },
+            "time": { "type": ["string", "null"], "pattern": "^\\d{2}:\\d{2}$" }
+          }
+        },
+        "modified_at": {
+          "type": ["object", "null"],
+          "description": "Дата и время последнего изменения карточки дела",
+          "additionalProperties": false,
+          "required": ["date", "time"],
+          "properties": {
+            "date": { "type": ["string", "null"], "format": "date" },
+            "time": { "type": ["string", "null"], "pattern": "^\\d{2}:\\d{2}$" }
+          }
+        }
+      }
+    },
+    "case_movement": {
+      "type": "array",
+      "description": "Движение дела — события (вкладка «Движение дела»)",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": ["name", "date"],
+        "properties": {
+          "name": {
+            "type": ["string", "null"],
+            "description": "Наименование события"
+          },
+          "date": {
+            "type": ["string", "null"],
+            "format": "date",
+            "description": "Дата события"
+          },
+          "time": {
+            "type": ["string", "null"],
+            "pattern": "^\\d{2}:\\d{2}$",
+            "description": "Время слушания"
+          },
+          "location": {
+            "type": ["string", "null"],
+            "description": "Место проведения (номер зала)"
+          },
+          "result": {
+            "type": ["string", "null"],
+            "description": "Результат события"
+          },
+          "reason": {
+            "type": ["string", "null"],
+            "description": "Основание для выбранного результата события"
+          },
+          "note": {
+            "type": ["string", "null"],
+            "description": "Примечание"
+          },
+          "published_at": {
+            "type": ["string", "null"],
+            "format": "date",
+            "description": "Дата размещения события"
+          }
+        }
+      }
+    },
+    "parties": {
+      "type": "array",
+      "description": "Лица, участвующие в деле (вкладка «Стороны»)",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": ["type", "name"],
+        "properties": {
+          "type": {
+            "type": ["string", "null"],
+            "description": "Вид лица, участвующего в деле (ИСТЕЦ, ОТВЕТЧИК, ТРЕТЬЕ ЛИЦО и т.п.)"
+          },
+          "name": {
+            "type": ["string", "null"],
+            "description": "Фамилия / наименование"
+          },
+          "inn": {
+            "type": ["string", "null"],
+            "description": "ИНН"
+          },
+          "kpp": {
+            "type": ["string", "null"],
+            "description": "КПП"
+          },
+          "ogrn": {
+            "type": ["string", "null"],
+            "description": "ОГРН"
+          },
+          "ogrnip": {
+            "type": ["string", "null"],
+            "description": "ОГРНИП"
+          }
+        }
+      }
+    }
+  }
+}
